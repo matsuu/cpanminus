@@ -56,6 +56,7 @@ sub new {
         format   => 'tree',
         save_dists => undef,
         skip_configure => 0,
+        no_xs => 0,
         @_,
     }, $class;
 }
