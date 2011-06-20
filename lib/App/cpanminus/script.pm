@@ -1311,6 +1311,7 @@ sub configure_this {
                 'List::MoreUtils'  => '-pm',
                 'Params::Util'     => '-pm',
                 'Mouse'            => '--pp',
+                'Net::DNS'         => '--noxs',
             };
             my $opts = $self->{no_xs} ? $noxs_opt_map->{$dist->{module}} : '';
             if ($self->configure([ $self->{perl}, @switches, "Makefile.PL", $opts ])) {
