@@ -111,6 +111,7 @@ sub parse_options {
             $self->{save_dists} = $self->maybe_abs($_[1]);
         },
         'skip-configure!' => \$self->{skip_configure},
+        'no-xs'           => \$self->{no_xs},
     );
 
     if (!@ARGV && $0 ne '-' && !-t STDIN){ # e.g. # cpanm < author/requires.cpanm
@@ -1304,7 +1305,14 @@ sub configure_this {
             # with 0 even if header files are missing, to avoid receiving
             # tons of FAIL reports in such cases. So exit code can't be
             # trusted if it went well.
-            if ($self->configure([ $self->{perl}, @switches, "Makefile.PL" ])) {
+            my $noxs_opt_map = {
+                'version'          => '--perl_only',
+                'List::MoreUtils'  => '-pm',
+                'Params::Util'     => '-pm',
+                'Mouse'            => '--pp',
+            };
+            my $opts = $self->{no_xs} ? $noxs_opt_map->{$dist->{module}} : '';
+            if ($self->configure([ $self->{perl}, @switches, "Makefile.PL", $opts ])) {
                 $state->{configured_ok} = -e 'Makefile';
             }
             $state->{configured}++;
@@ -1314,7 +1322,12 @@ sub configure_this {
     my $try_mb = sub {
         if (-e 'Build.PL') {
             $self->chat("Running Build.PL\n");
-            if ($self->configure([ $self->{perl}, @mb_switches, "Build.PL" ])) {
+            my $noxs_opt_map = {
+                'Params::Validate' => '--pp',
+                'DateTime'         => '--pp',
+            };
+            my $opts = $self->{no_xs} ? $noxs_opt_map->{$dist->{module}} : '';
+            if ($self->configure([ $self->{perl}, @mb_switches, "Build.PL", $opts ])) {
                 $state->{configured_ok} = -e 'Build' && -f _;
             }
             $state->{use_module_build}++;
