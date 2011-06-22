@@ -1288,6 +1288,7 @@ sub configure_this {
     my @switches;
     @switches = ("-I$self->{base}", "-MDumpedINC") if $self->{self_contained};
     local $ENV{PERL5LIB} = ''                      if $self->{self_contained};
+    local $ENV{PERL_ONLY} = 1                      if $self->{no_xs} && $dist->{module} eq 'Text::Xslate';
 
     my @mb_switches = @switches;
     unless ($self->{pod2man}) {
@@ -1307,11 +1308,13 @@ sub configure_this {
             # tons of FAIL reports in such cases. So exit code can't be
             # trusted if it went well.
             my $noxs_opt_map = {
-                'version'          => '--perl_only',
-                'List::MoreUtils'  => '-pm',
-                'Params::Util'     => '-pm',
-                'Mouse'            => '--pp',
-                'Net::DNS'         => '--noxs',
+                'version'             => '--perl_only',
+                'List::MoreUtils'     => '-pm',
+                'Params::Util'        => '-pm',
+                'Scalar::List::Utils' => '-pm',
+                'Mouse'               => '--pp',
+                'Net::DNS'            => '--noxs',
+                'Data::MessagePack'   => '--pp',
             };
             my $opts = $self->{no_xs} ? $noxs_opt_map->{$dist->{module}} : '';
             if ($self->configure([ $self->{perl}, @switches, "Makefile.PL", $opts ])) {
